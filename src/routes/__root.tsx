@@ -77,14 +77,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Site Contacts — Quick Call Directory" },
+      { name: "description", content: "Upload site data, filter by site, region or FOU, and tap to call managers and supervisors." },
+      { property: "og:title", content: "Site Contacts — Quick Call Directory" },
+      { property: "og:description", content: "Upload site data, filter by site, region or FOU, and tap to call managers and supervisors." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
