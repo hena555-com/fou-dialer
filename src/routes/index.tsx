@@ -61,8 +61,16 @@ function Index() {
     [sites],
   );
   const fous = useMemo(
-    () => Array.from(new Set(sites.map((s) => s.fou_g).filter(Boolean))).sort(),
-    [sites],
+    () =>
+      Array.from(
+        new Set(
+          sites
+            .filter((s) => region === "all" || s.site_region === region)
+            .map((s) => s.fou_g)
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [sites, region],
   );
 
   const filtered = useMemo(() => {
@@ -158,7 +166,10 @@ function Index() {
               <div className="flex gap-2">
                 <select
                   value={region}
-                  onChange={(e) => setRegion(e.target.value)}
+                  onChange={(e) => {
+                    setRegion(e.target.value);
+                    setFou("all");
+                  }}
                   className="h-10 flex-1 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring"
                 >
                   <option value="all">All regions</option>
