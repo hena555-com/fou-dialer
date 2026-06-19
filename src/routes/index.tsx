@@ -166,7 +166,10 @@ function Index() {
               <div className="flex gap-2">
                 <select
                   value={region}
-                  onChange={(e) => setRegion(e.target.value)}
+                  onChange={(e) => {
+                    setRegion(e.target.value);
+                    setFou("all");
+                  }}
                   className="h-10 flex-1 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring"
                 >
                   <option value="all">All regions</option>
