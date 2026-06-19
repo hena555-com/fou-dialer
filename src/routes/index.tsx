@@ -61,8 +61,16 @@ function Index() {
     [sites],
   );
   const fous = useMemo(
-    () => Array.from(new Set(sites.map((s) => s.fou_g).filter(Boolean))).sort(),
-    [sites],
+    () =>
+      Array.from(
+        new Set(
+          sites
+            .filter((s) => region === "all" || s.site_region === region)
+            .map((s) => s.fou_g)
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [sites, region],
   );
 
   const filtered = useMemo(() => {
