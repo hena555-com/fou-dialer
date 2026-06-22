@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Phone, Search, MapPin, User, HardHat, Radio, X, LogOut, Shield,
+  Phone, Search, MapPin, User, HardHat, Radio, X, LogOut, Shield, Upload,
 } from "lucide-react";
-import { formatPhone, type Site } from "@/lib/sites";
+import { formatPhone, parseFile, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/")({
 function Index() {
   const navigate = useNavigate();
   const { isAdmin, user } = useAuth();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [sites, setSites] = useState<Site[]>(() => {
     if (typeof window === "undefined") return [];
     try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "[]"); } catch { return []; }
@@ -25,18 +26,23 @@ function Index() {
   const [region, setRegion] = useState<string>("all");
   const [fou, setFou] = useState<string>("all");
   const [selected, setSelected] = useState<Site | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase
+  async function loadSites() {
+    const { data } = await supabase
       .from("sites")
       .select("ne_id,site_region,power_type,lat,lng,fou_g,manager1,manager1_phone,manager2,manager2_phone,sup_name,sup_phone")
-      .order("site_region")
-      .then(({ data }) => {
-        if (data) {
-          setSites(data as Site[]);
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {/* ignore */}
-        }
-      });
+      .order("site_region");
+    if (data) {
+      setSites(data as Site[]);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {/* ignore */}
+    }
+  }
+
+  useEffect(() => {
+    void loadSites();
   }, []);
 
   const regions = useMemo(
@@ -70,6 +76,29 @@ function Index() {
     await supabase.auth.signOut();
     try { localStorage.removeItem(CACHE_KEY); } catch {/* ignore */}
     navigate({ to: "/auth", replace: true });
+  }
+
+  async function handleUpload(file: File) {
+    setUploading(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const parsed = await parseFile(file);
+      if (!parsed.length) throw new Error("No rows found. Check your file headers.");
+
+      const del = await supabase.from("sites").delete().not("id", "is", null);
+      if (del.error) throw del.error;
+
+      const ins = await supabase.from("sites").insert(parsed);
+      if (ins.error) throw ins.error;
+
+      setMessage(`Uploaded ${parsed.length} sites.`);
+      await loadSites();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -140,11 +169,23 @@ function Index() {
                 {fous.map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
+            {isAdmin && (
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm active:scale-[0.99] disabled:opacity-60"
+              >
+                <Upload className="h-4 w-4" />
+                {uploading ? "Uploading…" : "Upload CSV / Excel data"}
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-4">
+        {message && <p className="mb-3 rounded-lg bg-primary/10 px-3 py-2 text-xs text-primary">{message}</p>}
+        {error && <p className="mb-3 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>}
         <p className="px-1 pb-2 text-xs text-muted-foreground">
           {filtered.length} of {sites.length} sites
         </p>
@@ -177,13 +218,32 @@ function Index() {
           ))}
           {filtered.length === 0 && (
             <li className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              {sites.length === 0
-                ? "No sites yet. Ask an admin to upload data."
-                : "No sites match your filters."}
+              <p>{sites.length === 0 ? "No sites yet." : "No sites match your filters."}</p>
+              {isAdmin && sites.length === 0 && (
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                >
+                  <Upload className="h-4 w-4" /> Upload data
+                </button>
+              )}
             </li>
           )}
         </ul>
       </main>
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".csv,.xlsx,.xls,.txt"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleUpload(file);
+          e.target.value = "";
+        }}
+      />
 
       {selected && <SiteSheet site={selected} onClose={() => setSelected(null)} />}
     </div>
