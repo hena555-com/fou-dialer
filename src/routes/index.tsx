@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
+  Phone, Search, MapPin, User, HardHat, Radio, X,
 } from "lucide-react";
-import { formatPhone, parseFile, type Site } from "@/lib/sites";
+import { formatPhone, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
 
 const CACHE_KEY = "sites_cache_v1";
