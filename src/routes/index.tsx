@@ -14,7 +14,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const fileRef = useRef<HTMLInputElement>(null);
   const [sites, setSites] = useState<Site[]>(() => {
     if (typeof window === "undefined") return [];
     try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "[]"); } catch { return []; }
@@ -23,9 +22,6 @@ function Index() {
   const [region, setRegion] = useState<string>("all");
   const [fou, setFou] = useState<string>("all");
   const [selected, setSelected] = useState<Site | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   async function loadSites() {
     const { data } = await supabase
@@ -67,28 +63,6 @@ function Index() {
     });
   }, [sites, query, region, fou]);
 
-  async function handleUpload(file: File) {
-    setUploading(true);
-    setMessage(null);
-    setError(null);
-    try {
-      const parsed = await parseFile(file);
-      if (!parsed.length) throw new Error("No rows found. Check your file headers.");
-
-      const del = await supabase.from("sites").delete().not("id", "is", null);
-      if (del.error) throw del.error;
-
-      const ins = await supabase.from("sites").insert(parsed);
-      if (ins.error) throw ins.error;
-
-      setMessage(`Uploaded ${parsed.length} sites.`);
-      await loadSites();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
