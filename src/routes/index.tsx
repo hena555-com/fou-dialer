@@ -1,38 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Phone, Search, MapPin, User, HardHat, Radio, X } from "lucide-react";
-import { formatPhone, type Site } from "@/lib/sites";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
+} from "lucide-react";
+import { formatPhone, parseFile, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
 
-const CACHE_KEY = "sites_public_cache_v1";
+const CACHE_KEY = "sites_cache_v1";
 
-export const Route = createFileRoute("/view")({
-  head: () => ({ meta: [{ title: "FOU Dialer — Directory" }] }),
-  component: PublicView,
+export const Route = createFileRoute("/")({
+  head: () => ({ meta: [{ title: "FOU Dialer" }] }),
+  component: Index,
 });
 
-function PublicView() {
+function Index() {
+  const fileRef = useRef<HTMLInputElement>(null);
   const [sites, setSites] = useState<Site[]>(() => {
     if (typeof window === "undefined") return [];
     try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "[]"); } catch { return []; }
   });
   const [query, setQuery] = useState("");
-  const [region, setRegion] = useState("all");
-  const [fou, setFou] = useState("all");
+  const [region, setRegion] = useState<string>("all");
+  const [fou, setFou] = useState<string>("all");
   const [selected, setSelected] = useState<Site | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase
+  async function loadSites() {
+    const { data } = await supabase
       .from("sites")
       .select("ne_id,site_region,power_type,lat,lng,fou_g,manager1,manager1_phone,manager2,manager2_phone,sup_name,sup_phone")
-      .order("site_region")
-      .then(({ data }) => {
-        if (data) {
-          setSites(data as Site[]);
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {/* ignore */}
-        }
-      });
-  }, []);
+      .order("site_region");
+    if (data) {
+      setSites(data as Site[]);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {/* ignore */}
+    }
+  }
+
+  useEffect(() => { void loadSites(); }, []);
 
   const regions = useMemo(
     () => Array.from(new Set(sites.map((s) => s.site_region).filter(Boolean))).sort(),
@@ -61,19 +67,44 @@ function PublicView() {
     });
   }, [sites, query, region, fou]);
 
+  async function handleUpload(file: File) {
+    setUploading(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const parsed = await parseFile(file);
+      if (!parsed.length) throw new Error("No rows found. Check your file headers.");
+
+      const del = await supabase.from("sites").delete().not("id", "is", null);
+      if (del.error) throw del.error;
+
+      const ins = await supabase.from("sites").insert(parsed);
+      if (ins.error) throw ins.error;
+
+      setMessage(`Uploaded ${parsed.length} sites.`);
+      await loadSites();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto max-w-2xl px-4 py-4">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shrink-0">
-              <Radio className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-base font-semibold leading-tight truncate">FOU Dialer</h1>
-              <p className="text-xs text-muted-foreground truncate">
-                {sites.length ? `${sites.length} sites` : "Loading…"}
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shrink-0">
+                <Radio className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-base font-semibold leading-tight truncate">FOU Dialer</h1>
+                <p className="text-xs text-muted-foreground truncate">
+                  {sites.length ? `${sites.length} sites` : "No sites yet"}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -110,11 +141,21 @@ function PublicView() {
                 {fous.map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm active:scale-[0.99] disabled:opacity-60"
+            >
+              <Upload className="h-4 w-4" />
+              {uploading ? "Uploading…" : "Upload CSV / Excel data"}
+            </button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-4">
+        {message && <p className="mb-3 rounded-lg bg-primary/10 px-3 py-2 text-xs text-primary">{message}</p>}
+        {error && <p className="mb-3 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>}
         <p className="px-1 pb-2 text-xs text-muted-foreground">
           {filtered.length} of {sites.length} sites
         </p>
@@ -147,11 +188,32 @@ function PublicView() {
           ))}
           {filtered.length === 0 && (
             <li className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              {sites.length === 0 ? "No sites available yet." : "No sites match your filters."}
+              <p>{sites.length === 0 ? "No sites yet." : "No sites match your filters."}</p>
+              {sites.length === 0 && (
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                >
+                  <Upload className="h-4 w-4" /> Upload data
+                </button>
+              )}
             </li>
           )}
         </ul>
       </main>
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".csv,.xlsx,.xls,.txt"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleUpload(file);
+          e.target.value = "";
+        }}
+      />
 
       {selected && <SiteSheet site={selected} onClose={() => setSelected(null)} />}
     </div>
