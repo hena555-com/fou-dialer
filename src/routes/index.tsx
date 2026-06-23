@@ -115,14 +115,6 @@ function Index() {
                 {fous.map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm active:scale-[0.99] disabled:opacity-60"
-            >
-              <Upload className="h-4 w-4" />
-              {uploading ? "Uploading…" : "Upload CSV / Excel data"}
-            </button>
           </div>
         </div>
       </header>
