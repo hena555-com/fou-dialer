@@ -84,6 +84,12 @@ function Index() {
                 </p>
               </div>
             </div>
+            <Link
+              to="/upload"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted shrink-0"
+            >
+              <Upload className="h-3.5 w-3.5" /> Upload
+            </Link>
           </div>
 
           <div className="mt-3 space-y-2">
