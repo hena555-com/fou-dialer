@@ -163,6 +163,14 @@ function Index() {
           {filtered.length === 0 && (
             <li className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
               <p>{sites.length === 0 ? "No sites yet." : "No sites match your filters."}</p>
+              {sites.length === 0 && (
+                <Link
+                  to="/upload"
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+                >
+                  <Upload className="h-4 w-4" /> Upload data
+                </Link>
+              )}
             </li>
           )}
         </ul>
