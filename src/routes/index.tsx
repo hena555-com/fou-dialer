@@ -120,8 +120,6 @@ function Index() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-4">
-        {message && <p className="mb-3 rounded-lg bg-primary/10 px-3 py-2 text-xs text-primary">{message}</p>}
-        {error && <p className="mb-3 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>}
         <p className="px-1 pb-2 text-xs text-muted-foreground">
           {filtered.length} of {sites.length} sites
         </p>
@@ -155,31 +153,10 @@ function Index() {
           {filtered.length === 0 && (
             <li className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
               <p>{sites.length === 0 ? "No sites yet." : "No sites match your filters."}</p>
-              {sites.length === 0 && (
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-                >
-                  <Upload className="h-4 w-4" /> Upload data
-                </button>
-              )}
             </li>
           )}
         </ul>
       </main>
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept=".csv,.xlsx,.xls,.txt"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) void handleUpload(file);
-          e.target.value = "";
-        }}
-      />
 
       {selected && <SiteSheet site={selected} onClose={() => setSelected(null)} />}
     </div>
