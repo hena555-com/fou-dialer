@@ -22,6 +22,7 @@ function Index() {
   const [region, setRegion] = useState<string>("all");
   const [fou, setFou] = useState<string>("all");
   const [selected, setSelected] = useState<Site | null>(null);
+  const navigate = useNavigate();
 
   async function loadSites() {
     const { data } = await supabase
@@ -31,6 +32,9 @@ function Index() {
     if (data) {
       setSites(data as Site[]);
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {/* ignore */}
+      if (data.length === 0) {
+        void navigate({ to: "/upload" });
+      }
     }
   }
 
