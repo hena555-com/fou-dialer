@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Phone, Search, MapPin, User, HardHat, Radio, X,
+  Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
 } from "lucide-react";
 import { formatPhone, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ function Index() {
   const [region, setRegion] = useState<string>("all");
   const [fou, setFou] = useState<string>("all");
   const [selected, setSelected] = useState<Site | null>(null);
+  const navigate = useNavigate();
 
   async function loadSites() {
     const { data } = await supabase
@@ -31,6 +32,9 @@ function Index() {
     if (data) {
       setSites(data as Site[]);
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {/* ignore */}
+      if (data.length === 0) {
+        void navigate({ to: "/upload" });
+      }
     }
   }
 
@@ -80,6 +84,12 @@ function Index() {
                 </p>
               </div>
             </div>
+            <Link
+              to="/upload"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted shrink-0"
+            >
+              <Upload className="h-3.5 w-3.5" /> Upload
+            </Link>
           </div>
 
           <div className="mt-3 space-y-2">
@@ -153,6 +163,14 @@ function Index() {
           {filtered.length === 0 && (
             <li className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
               <p>{sites.length === 0 ? "No sites yet." : "No sites match your filters."}</p>
+              {sites.length === 0 && (
+                <Link
+                  to="/upload"
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+                >
+                  <Upload className="h-4 w-4" /> Upload data
+                </Link>
+              )}
             </li>
           )}
         </ul>
