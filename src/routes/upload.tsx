@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Upload, ArrowLeft } from "lucide-react";
 import { parseFile, type Site } from "@/lib/sites";
@@ -10,9 +10,11 @@ export const Route = createFileRoute("/upload")({
 });
 
 const BATCH_SIZE = 1000;
+const CONCURRENCY = 5;
 
 function UploadPage() {
   const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<string>("");
   const [message, setMessage] = useState<string | null>(null);
@@ -32,28 +34,46 @@ function UploadPage() {
       if (del.error) throw del.error;
 
       const total = parsed.length;
-      const batches = Math.ceil(total / BATCH_SIZE);
-      let inserted = 0;
-      const errors: string[] = [];
-
-      for (let i = 0; i < batches; i++) {
-        const batch = parsed.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE) as Site[];
-        const ins = await supabase.from("sites").insert(batch);
-        if (ins.error) {
-          errors.push(`Batch ${i + 1}: ${ins.error.message}`);
-        } else {
-          inserted += batch.length;
-        }
-        setProgress(`Uploading… checked ${(i + 1) * BATCH_SIZE > total ? total : (i + 1) * BATCH_SIZE}/${total} rows (saved ${inserted})`);
+      const batches: Site[][] = [];
+      for (let i = 0; i < total; i += BATCH_SIZE) {
+        batches.push(parsed.slice(i, i + BATCH_SIZE) as Site[]);
       }
+
+      let inserted = 0;
+      let done = 0;
+      const errors: string[] = [];
+      let cursor = 0;
+
+      async function worker() {
+        while (cursor < batches.length) {
+          const idx = cursor++;
+          const batch = batches[idx];
+          const ins = await supabase.from("sites").insert(batch);
+          if (ins.error) {
+            errors.push(`Batch ${idx + 1}: ${ins.error.message}`);
+          } else {
+            inserted += batch.length;
+          }
+          done++;
+          setProgress(`Uploading… ${done}/${batches.length} batches (saved ${inserted}/${total})`);
+        }
+      }
+
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, batches.length) }, worker),
+      );
 
       try { localStorage.removeItem("sites_cache_v1"); } catch { /* ignore */ }
 
       if (errors.length) {
         setError(`Completed with errors: ${errors.slice(0, 3).join("; ")}`);
+        setMessage(`Uploaded ${inserted} of ${total} sites.`);
+        setProgress("");
+      } else {
+        setMessage(`Uploaded ${inserted} sites. Redirecting…`);
+        setProgress("");
+        void navigate({ to: "/" });
       }
-      setMessage(`Uploaded ${inserted} of ${total} sites.`);
-      setProgress("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
       setProgress("");
