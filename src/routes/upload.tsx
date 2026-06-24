@@ -9,7 +9,7 @@ export const Route = createFileRoute("/upload")({
   component: UploadPage,
 });
 
-const BATCH_SIZE = 500;
+const BATCH_SIZE = 1000;
 
 function UploadPage() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -44,7 +44,7 @@ function UploadPage() {
         } else {
           inserted += batch.length;
         }
-        setProgress(`Uploading… ${inserted}/${total} rows (batch ${i + 1}/${batches})`);
+        setProgress(`Uploading… checked ${(i + 1) * BATCH_SIZE > total ? total : (i + 1) * BATCH_SIZE}/${total} rows (saved ${inserted})`);
       }
 
       try { localStorage.removeItem("sites_cache_v1"); } catch { /* ignore */ }
