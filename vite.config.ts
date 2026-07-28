@@ -22,7 +22,7 @@ export default defineConfig({
         devOptions: { enabled: false },
         workbox: {
           navigateFallback: "/",
-          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//],
+          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/mcp/, /^\/\.well-known/, /^\/\.mcp/],
           globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2}"],
           runtimeCaching: [
             {
