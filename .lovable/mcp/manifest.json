@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "fou-dialer-mcp",
+      "version": "0.1.0",
+      "title": "FOU Dialer"
+    },
+    "tools": [
+      {
+        "name": "search_sites",
+        "title": "Search sites",
+        "description": "Search sites in the FOU Dialer directory by free-text query (matches site ID, region, FOU group, manager or supervisor names). Optionally filter by region and/or FOU group. Returns up to `limit` matching sites with their contact numbers.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Free-text search across ne_id, site_region, fou_g, manager1, sup_name."
+            },
+            "region": {
+              "type": "string",
+              "description": "Exact site_region filter."
+            },
+            "fou_g": {
+              "type": "string",
+              "description": "Exact FOU group filter."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Max rows to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_site",
+        "title": "Get site by NE ID",
+        "description": "Fetch a single site by its ne_id, including region, FOU group, coordinates and all contact numbers.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "ne_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The site's NE ID."
+            }
+          },
+          "required": [
+            "ne_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_regions",
+        "title": "List regions and FOU groups",
+        "description": "Return the distinct site regions and, for each, the FOU groups present in that region. Useful before calling search_sites with filters.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
