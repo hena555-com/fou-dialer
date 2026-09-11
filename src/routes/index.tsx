@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
 } from "lucide-react";
@@ -65,21 +65,34 @@ function Index() {
     [sites, region],
   );
 
+  // Pre-compute one lowercase haystack per site so typing doesn't redo it each keystroke
+  const indexed = useMemo(
+    () =>
+      sites.map((s) => ({
+        s,
+        hay: `${s.ne_id} ${s.site_region} ${s.fou_g} ${s.manager1} ${s.sup_name}`.toLowerCase(),
+      })),
+    [sites],
+  );
+
+  const deferredQuery = useDeferredValue(query);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return sites.filter((s) => {
-      if (region !== "all" && s.site_region !== region) return false;
-      if (fou !== "all" && s.fou_g !== fou) return false;
-      if (!q) return true;
-      return (
-        s.ne_id.toLowerCase().includes(q) ||
-        s.site_region.toLowerCase().includes(q) ||
-        s.fou_g.toLowerCase().includes(q) ||
-        s.manager1.toLowerCase().includes(q) ||
-        s.sup_name.toLowerCase().includes(q)
-      );
-    });
-  }, [sites, query, region, fou]);
+    const q = deferredQuery.trim().toLowerCase();
+    const out: Site[] = [];
+    for (const { s, hay } of indexed) {
+      if (region !== "all" && s.site_region !== region) continue;
+      if (fou !== "all" && s.fou_g !== fou) continue;
+      if (q && !hay.includes(q)) continue;
+      out.push(s);
+    }
+    return out;
+  }, [indexed, deferredQuery, region, fou]);
+
+  const [visible, setVisible] = useState(100);
+  useEffect(() => { setVisible(100); }, [deferredQuery, region, fou]);
+  const shown = useMemo(() => filtered.slice(0, visible), [filtered, visible]);
+
 
 
   return (
@@ -148,7 +161,7 @@ function Index() {
           {filtered.length} of {sites.length} sites
         </p>
         <ul className="space-y-2">
-          {filtered.map((s, i) => (
+          {shown.map((s, i) => (
             <li key={`${s.ne_id}-${i}`}>
               <button
                 onClick={() => setSelected(s)}
@@ -185,6 +198,16 @@ function Index() {
                   <Upload className="h-4 w-4" /> Upload data
                 </Link>
               )}
+            </li>
+          )}
+          {filtered.length > shown.length && (
+            <li>
+              <button
+                onClick={() => setVisible((v) => v + 200)}
+                className="w-full rounded-2xl border border-border bg-card p-3 text-sm font-medium text-foreground hover:bg-muted"
+              >
+                Show more ({filtered.length - shown.length} left)
+              </button>
             </li>
           )}
         </ul>
