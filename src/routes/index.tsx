@@ -161,7 +161,7 @@ function Index() {
           {filtered.length} of {sites.length} sites
         </p>
         <ul className="space-y-2">
-          {filtered.map((s, i) => (
+          {shown.map((s, i) => (
             <li key={`${s.ne_id}-${i}`}>
               <button
                 onClick={() => setSelected(s)}
@@ -198,6 +198,16 @@ function Index() {
                   <Upload className="h-4 w-4" /> Upload data
                 </Link>
               )}
+            </li>
+          )}
+          {filtered.length > shown.length && (
+            <li>
+              <button
+                onClick={() => setVisible((v) => v + 200)}
+                className="w-full rounded-2xl border border-border bg-card p-3 text-sm font-medium text-foreground hover:bg-muted"
+              >
+                Show more ({filtered.length - shown.length} left)
+              </button>
             </li>
           )}
         </ul>
