@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Upload, ArrowLeft } from "lucide-react";
 import { parseFile, type Site } from "@/lib/sites";
