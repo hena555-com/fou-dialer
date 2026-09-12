@@ -3,9 +3,20 @@ import { useRef, useState } from "react";
 import { Upload, ArrowLeft } from "lucide-react";
 import { parseFile, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
+import { requireUnlocked } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/upload")({
-  head: () => ({ meta: [{ title: "Upload Sites" }] }),
+  loader: () => requireUnlocked(),
+  head: () => ({
+    meta: [
+      { title: "Upload sites data | FOU Dialer" },
+      { name: "description", content: "Replace the site directory by uploading a CSV or Excel file." },
+      { property: "og:title", content: "Upload sites data | FOU Dialer" },
+      { property: "og:description", content: "Replace the site directory by uploading a CSV or Excel file." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: UploadPage,
 });
 

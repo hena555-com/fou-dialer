@@ -5,12 +5,23 @@ import {
 } from "lucide-react";
 import { formatPhone, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
+import { requireUnlocked } from "@/lib/gate.functions";
 
 const CACHE_KEY = "sites_cache_v1";
 const PAGE_SIZE = 1000;
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "FOU Dialer" }] }),
+  loader: () => requireUnlocked(),
+  head: () => ({
+    meta: [
+      { title: "FOU Dialer — Site & FOU contacts" },
+      { name: "description", content: "Private directory of site managers and FOU supervisors with one-tap calling." },
+      { property: "og:title", content: "FOU Dialer" },
+      { property: "og:description", content: "Private directory of site managers and FOU supervisors." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Index,
 });
 
