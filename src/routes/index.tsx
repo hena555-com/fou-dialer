@@ -1,17 +1,20 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
 } from "lucide-react";
 import { formatPhone, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
-import { requireUnlocked } from "@/lib/gate.functions";
+import { isUnlocked } from "@/lib/gate.functions";
 
 const CACHE_KEY = "sites_cache_v1";
 const PAGE_SIZE = 1000;
 
 export const Route = createFileRoute("/")({
-  loader: () => requireUnlocked(),
+  beforeLoad: async () => {
+    const { unlocked } = await isUnlocked();
+    if (!unlocked) throw redirect({ to: "/unlock" });
+  },
   head: () => ({
     meta: [
       { title: "FOU Dialer — Site & FOU contacts" },
