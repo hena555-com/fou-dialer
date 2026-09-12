@@ -26,10 +26,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [sites, setSites] = useState<Site[]>(() => {
-    if (typeof window === "undefined") return [];
-    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "[]"); } catch { return []; }
-  });
+  const [sites, setSites] = useState<Site[]>([]);
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<string>("all");
   const [fou, setFou] = useState<string>("all");
@@ -63,7 +60,13 @@ function Index() {
     }
   }
 
-  useEffect(() => { void loadSites(); }, []);
+  useEffect(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
+      if (cached.length) setSites(cached);
+    } catch { /* ignore */ }
+    void loadSites();
+  }, []);
 
   const regions = useMemo(
     () => Array.from(new Set(sites.map((s) => s.site_region).filter(Boolean))).sort(),
