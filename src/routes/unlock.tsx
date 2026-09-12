@@ -21,18 +21,20 @@ export const Route = createFileRoute("/unlock")({
 function Unlock() {
   const router = useRouter();
   const unlock = useServerFn(unlockSite);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const password = String(new FormData(e.currentTarget).get("password") ?? "");
+  async function submit() {
+    if (busy || !password) return;
     setBusy(true);
     setError(false);
     try {
       const { ok } = await unlock({ data: { password } });
       if (ok) await router.navigate({ to: "/" });
       else setError(true);
+    } catch {
+      setError(true);
     } finally {
       setBusy(false);
     }
