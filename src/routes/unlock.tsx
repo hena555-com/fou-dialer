@@ -21,18 +21,20 @@ export const Route = createFileRoute("/unlock")({
 function Unlock() {
   const router = useRouter();
   const unlock = useServerFn(unlockSite);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const password = String(new FormData(e.currentTarget).get("password") ?? "");
+  async function submit() {
+    if (busy || !password) return;
     setBusy(true);
     setError(false);
     try {
       const { ok } = await unlock({ data: { password } });
       if (ok) await router.navigate({ to: "/" });
       else setError(true);
+    } catch {
+      setError(true);
     } finally {
       setBusy(false);
     }
@@ -55,23 +57,26 @@ function Unlock() {
           Enter the shared passcode to view site contacts.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3">
           <input
-            name="password"
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
             autoComplete="current-password"
             placeholder="Passcode"
             className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
           {error && <p className="text-xs text-destructive">Incorrect passcode.</p>}
           <button
-            type="submit"
-            disabled={busy}
+            type="button"
+            onClick={() => void submit()}
+            disabled={busy || !password}
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
           >
             <Lock className="h-4 w-4" /> {busy ? "Checking…" : "Enter"}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
