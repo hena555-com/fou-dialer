@@ -1,12 +1,15 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Upload, ArrowLeft } from "lucide-react";
 import { parseFile, type Site } from "@/lib/sites";
 import { supabase } from "@/integrations/supabase/client";
-import { requireUnlocked } from "@/lib/gate.functions";
+import { isUnlocked } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/upload")({
-  loader: () => requireUnlocked(),
+  beforeLoad: async () => {
+    const { unlocked } = await isUnlocked();
+    if (!unlocked) throw redirect({ to: "/unlock" });
+  },
   head: () => ({
     meta: [
       { title: "Upload sites data | FOU Dialer" },
