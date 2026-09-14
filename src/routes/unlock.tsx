@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Lock, Radio } from "lucide-react";
@@ -19,7 +19,6 @@ export const Route = createFileRoute("/unlock")({
 });
 
 function Unlock() {
-  const router = useRouter();
   const unlock = useServerFn(unlockSite);
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
@@ -31,7 +30,10 @@ function Unlock() {
     setError(false);
     try {
       const { ok } = await unlock({ data: { password } });
-      if (ok) await router.navigate({ to: "/" });
+      if (ok) {
+        window.location.assign("/");
+        return;
+      }
       else setError(true);
     } catch {
       setError(true);
