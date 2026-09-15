@@ -8,7 +8,7 @@ import { isUnlocked } from "@/lib/gate.functions";
 export const Route = createFileRoute("/upload")({
   beforeLoad: async () => {
     const { unlocked } = await isUnlocked();
-    if (!unlocked) throw redirect({ to: "/unlock" });
+    if (!unlocked) throw redirect({ to: "/unlock", search: { error: false } });
   },
   head: () => ({
     meta: [

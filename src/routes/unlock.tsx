@@ -1,10 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
 import { Lock, Radio } from "lucide-react";
-import { isUnlocked, unlockSite } from "@/lib/gate.functions";
+import { isUnlocked } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/unlock")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    error: search.error === "1",
+  }),
   beforeLoad: async () => {
     const { unlocked } = await isUnlocked();
     if (unlocked) throw redirect({ to: "/" });
@@ -23,30 +24,7 @@ export const Route = createFileRoute("/unlock")({
 });
 
 function Unlock() {
-  const unlock = useServerFn(unlockSite);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
-
-  async function submit() {
-    if (busy || !password) return;
-    setBusy(true);
-    setError(false);
-    try {
-      const { ok } = await unlock({ data: { password } });
-      if (ok) {
-        setUnlocked(true);
-        window.location.replace("/");
-        return;
-      }
-      else setError(true);
-    } catch {
-      setError(true);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { error: hasError } = Route.useSearch();
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -62,36 +40,26 @@ function Unlock() {
         </div>
 
         <p className="mt-4 text-sm text-muted-foreground">
-          {unlocked ? "Unlocked. Open the site directory." : "Enter the shared passcode to view site contacts."}
+          Enter the shared passcode to view site contacts.
         </p>
 
-        {unlocked ? (
-          <a
-            href="/"
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground"
-          >
-            Open site list
-          </a>
-        ) : <div className="mt-4 space-y-3">
+        <form action="/api/public/unlock" method="post" className="mt-4 space-y-3">
           <input
+            name="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
+            required
             autoComplete="current-password"
             placeholder="Passcode"
             className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
-          {error && <p className="text-xs text-destructive">Incorrect passcode.</p>}
+          {hasError && <p className="text-xs text-destructive">Incorrect passcode.</p>}
           <button
-            type="button"
-            onClick={() => void submit()}
-            disabled={busy || !password}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60"
+            type="submit"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground"
           >
-            <Lock className="h-4 w-4" /> {busy ? "Checking…" : "Enter"}
+            <Lock className="h-4 w-4" /> Enter
           </button>
-        </div>}
+        </form>
       </div>
     </div>
   );
