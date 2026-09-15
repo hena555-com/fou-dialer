@@ -13,7 +13,7 @@ const PAGE_SIZE = 1000;
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     const { unlocked } = await isUnlocked();
-    if (!unlocked) throw redirect({ to: "/unlock" });
+    if (!unlocked) throw redirect({ to: "/unlock", search: { error: false } });
   },
   head: () => ({
     meta: [
