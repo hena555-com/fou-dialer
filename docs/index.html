@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FOU Dialer</title>
 <meta name="theme-color" content="#E63329">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FOU Dialer">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE2IiBmaWxsPSIjMjA1NEM3Ii8+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MSwxMjApIHNjYWxlKDkpIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMS43IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMi40IiByPSIxIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTIgMy40djQuNiIvPgogIDxwYXRoIGQ9Ik0xMiA4IDcuMyAyMCIvPgogIDxwYXRoIGQ9Ik0xMiA4bDQuNyAxMiIvPgogIDxwYXRoIGQ9Ik04LjkgMTUuNGg2LjIiLz4KICA8cGF0aCBkPSJNMTAuMSAxMi4yaDMuOCIvPgogIDxyZWN0IHg9IjguNiIgeT0iMjAiIHdpZHRoPSI2LjgiIGhlaWdodD0iNC42IiByeD0iMC42IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTAuNCAyMS40djEuOE0xMiAyMS40djEuOE0xMy42IDIxLjR2MS44IiBzdHJva2U9IiMyMDU0QzciIHN0cm9rZS13aWR0aD0iMC43Ii8+CjwvZz4KPC9zdmc+">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE2IiBmaWxsPSIjMjA1NEM3Ii8+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MSwxMjApIHNjYWxlKDkpIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMS43IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMi40IiByPSIxIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTIgMy40djQuNiIvPgogIDxwYXRoIGQ9Ik0xMiA4IDcuMyAyMCIvPgogIDxwYXRoIGQ9Ik0xMiA4bDQuNyAxMiIvPgogIDxwYXRoIGQ9Ik04LjkgMTUuNGg2LjIiLz4KICA8cGF0aCBkPSJNMTAuMSAxMi4yaDMuOCIvPgogIDxyZWN0IHg9IjguNiIgeT0iMjAiIHdpZHRoPSI2LjgiIGhlaWdodD0iNC42IiByeD0iMC42IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9Im5vbmUiLz4KICA8cGF0aCBkPSJNMTAuNCAyMS40djEuOE0xMiAyMS40djEuOE0xMy42IDIxLjR2MS44IiBzdHJva2U9IiMyMDU0QzciIHN0cm9rZS13aWR0aD0iMC43Ii8+CjwvZz4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,6 +127,28 @@
     color:var(--red);font-weight:600;background:none;border:none;
     font-size:11px;padding:0;cursor:pointer;display:none;font-family:inherit;
   }
+
+  #install-banner{
+    display:none;align-items:center;gap:10px;
+    background:#FFF6EC;border-bottom:1px solid #F3DFC1;
+    padding:10px 16px;flex:0 0 auto;
+  }
+  #install-banner.show{display:flex;}
+  #install-banner .install-icon{
+    width:32px;height:32px;border-radius:9px;background:#2054C7;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #install-banner .install-icon svg{width:16px;height:16px;color:#fff;}
+  #install-banner .install-text{flex:1;min-width:0;font-size:12px;color:#7A5A1E;line-height:1.3;}
+  #install-banner .install-text b{display:block;color:#4A3610;font-size:12.5px;}
+  #install-btn{
+    background:#E63329;color:#fff;border:none;font-size:12px;font-weight:700;
+    padding:8px 14px;border-radius:999px;cursor:pointer;flex:0 0 auto;font-family:inherit;
+  }
+  #install-dismiss{
+    background:none;border:none;color:#B7935A;padding:4px;cursor:pointer;flex:0 0 auto;
+  }
+  #install-dismiss svg{width:15px;height:15px;}
 
   /* ---- List ---- */
   #list-viewport{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;cursor:grab;}
@@ -284,6 +310,17 @@
       <div class="filter-select"><select id="fou-select"><option value="">All FOUs</option></select></div>
     </div>
   </header>
+
+  <div id="install-banner">
+    <div class="install-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M6 10l6-6 6 6"/><path d="M4 18v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>
+    </div>
+    <div class="install-text"><b>Install FOU Dialer</b>Add it to your home screen for one-tap access</div>
+    <button id="install-btn">Install</button>
+    <button id="install-dismiss" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
 
   <div class="status-strip">
     <span id="result-count">0 of 0 sites</span>
@@ -727,6 +764,45 @@ els.fileInput.addEventListener('change', (e) => {
 });
 
 initData();
+
+/* ---------------- PWA: service worker + install prompt ---------------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* offline support unavailable, app still works */ });
+  });
+}
+
+let deferredInstallPrompt = null;
+const installBanner = document.getElementById('install-banner');
+const installBtn = document.getElementById('install-btn');
+const installDismiss = document.getElementById('install-dismiss');
+const INSTALL_DISMISS_KEY = 'fou_dialer_install_dismissed';
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if(!localStorage.getItem(INSTALL_DISMISS_KEY)){
+    installBanner.classList.add('show');
+  }
+});
+
+installBtn.addEventListener('click', async () => {
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBanner.classList.remove('show');
+});
+
+installDismiss.addEventListener('click', () => {
+  installBanner.classList.remove('show');
+  try{ localStorage.setItem(INSTALL_DISMISS_KEY, '1'); }catch(e){}
+});
+
+window.addEventListener('appinstalled', () => {
+  installBanner.classList.remove('show');
+  deferredInstallPrompt = null;
+});
 </script>
 </body>
 </html>
