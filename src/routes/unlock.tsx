@@ -3,6 +3,9 @@ import { Lock, Radio } from "lucide-react";
 import { isUnlocked } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/unlock")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    error: search.error === "1",
+  }),
   beforeLoad: async () => {
     const { unlocked } = await isUnlocked();
     if (unlocked) throw redirect({ to: "/" });
@@ -21,7 +24,7 @@ export const Route = createFileRoute("/unlock")({
 });
 
 function Unlock() {
-  const hasError = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("error") === "1";
+  const { error: hasError } = Route.useSearch();
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
