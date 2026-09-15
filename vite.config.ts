@@ -21,19 +21,17 @@ export default defineConfig({
         filename: "sw.js",
         devOptions: { enabled: false },
         workbox: {
-          navigateFallback: "/",
-          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/mcp/, /^\/\.well-known/, /^\/\.mcp/],
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2}"],
+          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/mcp/, /^\/\.well-known/, /^\/\.mcp/, /^\/unlock/],
+          globPatterns: ["**/*.{js,css,ico,png,svg,webmanifest,woff,woff2}"],
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
           runtimeCaching: [
             {
               urlPattern: ({ request }) => request.mode === "navigate",
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "html-pages",
-                networkTimeoutSeconds: 4,
-                expiration: { maxEntries: 50 },
-              },
+              handler: "NetworkOnly",
             },
+
             {
               urlPattern: ({ url, sameOrigin }) =>
                 sameOrigin && /\.(?:js|css|woff2?)$/.test(url.pathname),
