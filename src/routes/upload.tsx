@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-ro
 import { useRef, useState } from "react";
 import { Upload, ArrowLeft } from "lucide-react";
 import { parseFile, type Site } from "@/lib/sites";
-import { supabase } from "@/integrations/supabase/client";
+import { clearDirectory, uploadDirectoryBatch } from "@/lib/directory.functions";
 import { isUnlocked } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/upload")({
@@ -44,8 +44,7 @@ function UploadPage() {
       if (!parsed.length) throw new Error("No rows found. Check your file headers.");
 
       setProgress(`Parsed ${parsed.length} rows. Clearing old data…`);
-      const del = await supabase.from("sites").delete().not("id", "is", null);
-      if (del.error) throw del.error;
+      await clearDirectory();
 
       const total = parsed.length;
       const batches: Site[][] = [];
@@ -62,11 +61,11 @@ function UploadPage() {
         while (cursor < batches.length) {
           const idx = cursor++;
           const batch = batches[idx];
-          const ins = await supabase.from("sites").insert(batch);
-          if (ins.error) {
-            errors.push(`Batch ${idx + 1}: ${ins.error.message}`);
-          } else {
+          try {
+            await uploadDirectoryBatch({ data: { sites: batch } });
             inserted += batch.length;
+          } catch (error) {
+            errors.push(`Batch ${idx + 1}: ${error instanceof Error ? error.message : "Upload failed"}`);
           }
           done++;
           setProgress(`Uploading… ${done}/${batches.length} batches (saved ${inserted}/${total})`);
