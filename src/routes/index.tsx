@@ -4,7 +4,7 @@ import {
   Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
 } from "lucide-react";
 import { formatPhone, type Site } from "@/lib/sites";
-import { supabase } from "@/integrations/supabase/client";
+import { readDirectoryPage } from "@/lib/directory.functions";
 import { isUnlocked } from "@/lib/gate.functions";
 
 const CACHE_KEY = "sites_cache_v1";
@@ -40,13 +40,10 @@ function Index() {
     const allSites: Site[] = [];
 
     for (let from = 0; ; from += PAGE_SIZE) {
-      const { data, error } = await supabase
-        .from("sites")
-        .select("ne_id,site_region,power_type,lat,lng,fou_g,manager1,manager1_phone,manager2,manager2_phone,sup_name,sup_phone")
-        .order("site_region")
-        .range(from, from + PAGE_SIZE - 1);
-
-      if (error) {
+      let data: Site[];
+      try {
+        data = await readDirectoryPage({ data: { from } });
+      } catch (error) {
         console.error("Failed to load sites", error);
         return;
       }
@@ -57,7 +54,7 @@ function Index() {
     }
 
     setSites(allSites);
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(allSites)); } catch {/* ignore */}
+    try { localStorage.removeItem(CACHE_KEY); } catch {/* ignore */}
     if (allSites.length === 0) {
       void navigate({ to: "/upload" });
     }
@@ -65,8 +62,8 @@ function Index() {
 
   useEffect(() => {
     try {
-      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
-      if (cached.length) setSites(cached);
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem("site_directory_v1");
     } catch { /* ignore */ }
     void loadSites();
   }, []);
