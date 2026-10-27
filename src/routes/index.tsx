@@ -4,12 +4,9 @@ import {
   Phone, Search, MapPin, User, HardHat, Radio, X, Upload,
 } from "lucide-react";
 import { formatPhone, type Site } from "@/lib/sites";
-import { readDirectoryPage } from "@/lib/directory.functions";
+import { readDirectoryPage, readCatalogPage as fetchCatalogPage } from "@/lib/directory.functions";
 import { isUnlocked } from "@/lib/gate.functions";
-import {
-  CATALOGS, readCatalogPage, type CatalogId, type ContactRow,
-} from "@/lib/catalogs";
-import { readCatalogPage as fetchCatalogPage } from "@/lib/directory.functions";
+import { CATALOGS, type CatalogId, type ContactRow } from "@/lib/catalogs";
 
 const PAGE_SIZE = 1000;
 
