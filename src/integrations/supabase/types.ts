@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalog_contacts: {
+        Row: {
+          catalog: string
+          created_at: string
+          device_name: string
+          fou_g: string
+          id: string
+          ip_address: string
+          manager: string
+          manager_phone: string
+          name: string
+          phone: string
+          site_region: string
+          sup_name: string
+          sup_phone: string
+          title: string
+          zone_region: string
+        }
+        Insert: {
+          catalog: string
+          created_at?: string
+          device_name?: string
+          fou_g?: string
+          id?: string
+          ip_address?: string
+          manager?: string
+          manager_phone?: string
+          name?: string
+          phone?: string
+          site_region?: string
+          sup_name?: string
+          sup_phone?: string
+          title?: string
+          zone_region?: string
+        }
+        Update: {
+          catalog?: string
+          created_at?: string
+          device_name?: string
+          fou_g?: string
+          id?: string
+          ip_address?: string
+          manager?: string
+          manager_phone?: string
+          name?: string
+          phone?: string
+          site_region?: string
+          sup_name?: string
+          sup_phone?: string
+          title?: string
+          zone_region?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
