@@ -101,8 +101,8 @@ function rowsToContacts(
       for (const k of Object.keys(row)) normalized[norm(k)] = row[k];
       const contact = emptyRow(catalog);
       for (const [alias, key] of Object.entries(map)) {
-        if (normalized[alias] !== undefined) {
-          contact[key] = cleanVal(normalized[alias]);
+        if (normalized[alias] !== undefined && key !== "catalog") {
+          (contact as Record<string, string>)[key] = cleanVal(normalized[alias]);
         }
       }
       if (contact[regionKey]) {
