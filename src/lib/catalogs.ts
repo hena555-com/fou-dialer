@@ -10,8 +10,10 @@ export const CATALOGS: { id: CatalogId; label: string }[] = [
   { id: "fn_access", label: "FN_access FOU" },
 ];
 
+export type ContactCatalog = "transport" | "metro" | "fn_access";
+
 export type ContactRow = {
-  catalog: string;
+  catalog: ContactCatalog;
   zone_region: string;
   title: string;
   name: string;
@@ -36,7 +38,7 @@ const cleanVal = (v: unknown): string => {
   return s;
 };
 
-const emptyRow = (catalog: string): ContactRow => ({
+const emptyRow = (catalog: ContactCatalog): ContactRow => ({
   catalog,
   zone_region: "",
   title: "",
@@ -99,8 +101,8 @@ function rowsToContacts(
       for (const k of Object.keys(row)) normalized[norm(k)] = row[k];
       const contact = emptyRow(catalog);
       for (const [alias, key] of Object.entries(map)) {
-        if (normalized[alias] !== undefined) {
-          contact[key] = cleanVal(normalized[alias]);
+        if (normalized[alias] !== undefined && key !== "catalog") {
+          (contact as Record<string, string>)[key] = cleanVal(normalized[alias]);
         }
       }
       if (contact[regionKey]) {
